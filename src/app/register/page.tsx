@@ -22,12 +22,23 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import z from "zod/v4";
 
-// Schema de validação dos dados
-const formSchema = z.object({
-  email: z.email(),
-  password: z.string().min(6),
-  passwordConfirm: z.string(),
-});
+// Schema de validação dos dados com mensagens amigáveis e superRefine
+const formSchema = z
+  .object({
+    email: z.email("E-mail inválido"),
+    password: z.string().min(6, "A senha deve ter no mínimo 6 caracteres"),
+    passwordConfirm: z.string(),
+  })
+  .superRefine((data, context) => {
+    // Camada avançada de validação: compara campos interdependentes
+    if (data.password !== data.passwordConfirm) {
+      context.addIssue({
+        code: "custom",
+        path: ["passwordConfirm"], // Associa a mensagem diretamente ao campo 'passwordConfirm'
+        message: "A senha não confere",
+      });
+    }
+  });
 
 export default function Page() {
   // Inicialização do React Hook Form com resolvedor do Zod
