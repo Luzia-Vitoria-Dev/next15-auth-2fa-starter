@@ -21,29 +21,13 @@ import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import z from "zod/v4";
-
-// Schema de validação dos dados com mensagens amigáveis e superRefine
-const formSchema = z
-  .object({
-    email: z.email("E-mail inválido"),
-    password: z.string().min(6, "A senha deve ter no mínimo 6 caracteres"),
-    passwordConfirm: z.string(),
-  })
-  .superRefine((data, context) => {
-    // Camada avançada de validação: compara campos interdependentes
-    if (data.password !== data.passwordConfirm) {
-      context.addIssue({
-        code: "custom",
-        path: ["passwordConfirm"], // Associa a mensagem diretamente ao campo 'passwordConfirm'
-        message: "A senha não confere",
-      });
-    }
-  });
+import { registerUser } from "./actions";
+import { userSchema, UserSchema } from "./schemas";
 
 export default function Page() {
   // Inicialização do React Hook Form com resolvedor do Zod
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<UserSchema>({
+    resolver: zodResolver(userSchema),
     defaultValues: {
       email: "",
       password: "",
@@ -52,9 +36,13 @@ export default function Page() {
   });
 
   // Função disparada no evento onSubmit após a validação do schema com sucesso
-  const handleSubmit = async (data: z.infer<typeof formSchema>) => {
-    // Lógica futura: Enviar requisição para a API / Server Action de cadastro
-    console.log("Dados validados com sucesso:", data);
+  const handleSubmit = async (data: z.infer<typeof userSchema>) => {
+    console.log("Dados validados com sucesso: ", data);
+
+    // Invocação da Server Action no clique do botão
+    const response = await registerUser(data);
+
+    console.log("Resposta da Server Action capturada no browser: ", response);
   };
 
   return (
