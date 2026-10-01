@@ -41,14 +41,15 @@ export default function Page() {
 
     // Invocação da Server Action no clique do botão
     const response = await registerUser(data);
+    console.log(response);
 
     // console.log("Resposta da Server Action capturada no browser: ", response);
 
-    // Se o servidor recusar a submissão por erro de validação
+    // Se o servidor recusar a submissão por erro de validação e retornar insucesso
     if (!response.success) {
-      if (Array.isArray(response.data)) {
+      if (Array.isArray(response.errors)) {
         // Mapeia iterativamente os erros do servidor nos inputs do formulário
-        response.data.forEach((issue) => {
+        response.errors.forEach((issue) => {
           issue.path.forEach((path) => {
             form.setError(path as keyof UserSchema, { message: issue.message });
           });
