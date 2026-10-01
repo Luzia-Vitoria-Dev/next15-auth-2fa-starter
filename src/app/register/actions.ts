@@ -1,6 +1,8 @@
 "use server";
 
+import { PrismaClient } from "../../../generated/prisma/client";
 import { userSchema } from "./schemas";
+import { hash } from "bcryptjs";
 
 interface RegisterUserProps {
   email: string;
@@ -13,11 +15,15 @@ export const registerUser = async ({
   password,
   passwordConfirm,
 }: RegisterUserProps) => {
+  // -----------------------------------------------------------------------
   // Logs executados EXCLUSIVAMENTE no terminal do servidor (Node.js)
+  // -----------------------------------------------------------------------
   // console.log("Chegamos no back-end");
   // console.log(">>>>> ", email, password, passwordConfirm);
 
-  // Executa a validação defensiva no servidor sem lançar exceções (throw error)
+  // -----------------------------------------------------------------------
+  // Validação Defensiva Server-Side
+  // -----------------------------------------------------------------------
   const newUserValidation = userSchema.safeParse({
     email,
     password,
@@ -35,12 +41,25 @@ export const registerUser = async ({
     };
   }
 
-  // TODO cadastrar o usuário no banco de dados
+  // -----------------------------------------------------------------------
+  // Criptografia da Senha (Hashing)
+  // -----------------------------------------------------------------------
+  const hashedPassword = await hash(password, 10);
 
-  // TODO: Criptografar senha (hash) e salvar no banco de dados
+  // -----------------------------------------------------------------------
+  // Persistência de Dados via Prisma Client
+  // -----------------------------------------------------------------------
+  const prismaClient = new PrismaClient();
 
+  const newUser = await prismaClient.user.create({
+    data: { email, password: hashedPassword },
+  });
+
+  // -----------------------------------------------------------------------
+  // Resposta Padronizada ao Client Component
+  // -----------------------------------------------------------------------
   return {
     success: true,
-    messagem: "Usuário cadastrado com sucesso!",
+    data: newUser,
   };
 };
