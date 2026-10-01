@@ -37,12 +37,24 @@ export default function Page() {
 
   // Função disparada no evento onSubmit após a validação do schema com sucesso
   const handleSubmit = async (data: z.infer<typeof userSchema>) => {
-    console.log("Dados validados com sucesso: ", data);
+    // console.log("Dados validados com sucesso: ", data);
 
     // Invocação da Server Action no clique do botão
     const response = await registerUser(data);
 
-    console.log("Resposta da Server Action capturada no browser: ", response);
+    // console.log("Resposta da Server Action capturada no browser: ", response);
+
+    // Se o servidor recusar a submissão por erro de validação
+    if (!response.success) {
+      if (Array.isArray(response.data)) {
+        // Mapeia iterativamente os erros do servidor nos inputs do formulário
+        response.data.forEach((issue) => {
+          issue.path.forEach((path) => {
+            form.setError(path as keyof UserSchema, { message: issue.message });
+          });
+        });
+      }
+    }
   };
 
   return (

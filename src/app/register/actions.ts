@@ -14,8 +14,8 @@ export const registerUser = async ({
   passwordConfirm,
 }: RegisterUserProps) => {
   // Logs executados EXCLUSIVAMENTE no terminal do servidor (Node.js)
-  console.log("Chegamos no back-end");
-  console.log(">>>>> ", email, password, passwordConfirm);
+  // console.log("Chegamos no back-end");
+  // console.log(">>>>> ", email, password, passwordConfirm);
 
   // Executa a validação defensiva no servidor sem lançar exceções (throw error)
   const newUserValidation = userSchema.safeParse({
@@ -24,13 +24,14 @@ export const registerUser = async ({
     passwordConfirm,
   });
 
-  console.log("Resultado da validação no back-end: ", newUserValidation);
+  // console.log("Resultado da validação no back-end: ", newUserValidation);
 
   // Bloqueia a execução caso os dados não estejam em conformidade com o schema
+  // Retorna os detalhes exatos das issues de validação caso falhe
   if (!newUserValidation.success) {
     return {
       success: false,
-      messagem: "Erro na validação dos dados do usuário!",
+      data: newUserValidation.error?.issues,
     };
   }
 
