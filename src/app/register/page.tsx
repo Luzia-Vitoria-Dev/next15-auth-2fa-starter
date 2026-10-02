@@ -39,7 +39,7 @@ export default function Page() {
   const handleSubmit = async (data: z.infer<typeof userSchema>) => {
     // console.log("Dados validados com sucesso: ", data);
 
-    // Invocação da Server Action no clique do botão
+    // Invocação da Server Action no clique do botão de registro
     const response = await registerUser(data);
     console.log(response);
 
@@ -60,74 +60,92 @@ export default function Page() {
 
   return (
     <div className="flex justify-center items-center min-h-screen">
-      <Card className="w-full max-w-sm">
-        <CardHeader>
-          <CardTitle>Registrar</CardTitle>
-          <CardDescription>Crie sua conta, é simples e rápido!</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <form
-              onSubmit={form.handleSubmit(handleSubmit)}
-              className="flex flex-col gap-4"
-            >
-              {/* CAMPO: EMAIL */}
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <Input {...field} type="email" />
-                    </FormControl>
-                    <FormDescription>
-                      Digite o seu melhor e-mail
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+      {/* TELA 1: FEEDBACK DE SUCESSO (Renderização Condicional) */}
+      {form.formState.isSubmitSuccessful ? (
+        <Card className="w-full max-w-sm">
+          <CardHeader>
+            <CardTitle>Conta registrada com sucesso!</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Button>Login</Button>
+          </CardContent>
+        </Card>
+      ) : (
+        /* TELA 2: FORMULÁRIO DE CADASTRO */
+        <Card className="w-full max-w-sm">
+          <CardHeader>
+            <CardTitle>Registrar</CardTitle>
+            <CardDescription>
+              Crie sua conta, é simples e rápido!
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(handleSubmit)}>
+                {/* Desabilita todos os campos internos de uma só vez durante o processamento assíncrono */}
+                <fieldset
+                  className="flex flex-col gap-4"
+                  disabled={form.formState.isSubmitting}
+                >
+                  {/* CAMPO: EMAIL */}
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email</FormLabel>
+                        <FormControl>
+                          <Input {...field} type="email" />
+                        </FormControl>
+                        <FormDescription>
+                          Digite o seu melhor e-mail
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-              {/* CAMPO: SENHA */}
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Senha</FormLabel>
-                    <FormControl>
-                      <Input {...field} type="password" />
-                    </FormControl>
-                    <FormDescription>
-                      A senha deve ter no mínimo 6 caracteres
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                  {/* CAMPO: SENHA */}
+                  <FormField
+                    control={form.control}
+                    name="password"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Senha</FormLabel>
+                        <FormControl>
+                          <Input {...field} type="password" />
+                        </FormControl>
+                        <FormDescription>
+                          A senha deve ter no mínimo 6 caracteres
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-              {/* CAMPO: CONFIRMAR SENHA */}
-              <FormField
-                control={form.control}
-                name="passwordConfirm"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Confirmar a senha</FormLabel>
-                    <FormControl>
-                      <Input {...field} type="password" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                  {/* CAMPO: CONFIRMAR SENHA */}
+                  <FormField
+                    control={form.control}
+                    name="passwordConfirm"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Confirmar a senha</FormLabel>
+                        <FormControl>
+                          <Input {...field} type="password" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-              {/* BOTAO DE SUBMISSAO */}
-              <Button type="submit">Registrar</Button>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
+                  {/* BOTAO DE SUBMISSAO */}
+                  <Button type="submit">Registrar</Button>
+                </fieldset>
+              </form>
+            </Form>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
