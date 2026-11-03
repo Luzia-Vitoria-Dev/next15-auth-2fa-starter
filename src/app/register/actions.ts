@@ -61,6 +61,8 @@ export const registerUser = async ({
     // -----------------------------------------------------------------------
     // Persistência de Dados via Prisma Client
     // -----------------------------------------------------------------------
+
+    // Utiliza a instância singleton compartilhada do Prisma
     const newUser = await prisma.user.create({
       data: { email, password: hashedPassword },
     });
