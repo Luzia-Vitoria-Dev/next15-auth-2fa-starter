@@ -1,9 +1,10 @@
 "use server";
 
 import { $ZodIssue } from "zod/v4/core";
-import { Prisma, PrismaClient, User } from "../../../generated/prisma/client";
+import { Prisma, User } from "../../../generated/prisma/client";
 import { userSchema } from "./schemas";
 import { hash } from "bcryptjs";
+import { prisma } from "@/lib/client";
 
 // Interface que define a estrutura padronizada de retorno de qualquer Server Action
 interface ActionResponse {
@@ -60,9 +61,7 @@ export const registerUser = async ({
     // -----------------------------------------------------------------------
     // Persistência de Dados via Prisma Client
     // -----------------------------------------------------------------------
-    const prismaClient = new PrismaClient();
-
-    const newUser = await prismaClient.user.create({
+    const newUser = await prisma.user.create({
       data: { email, password: hashedPassword },
     });
 
