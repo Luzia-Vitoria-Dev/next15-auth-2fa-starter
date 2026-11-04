@@ -20,6 +20,7 @@ import { Input } from "@/components/ui/input";
 import { useForm } from "react-hook-form";
 import { loginSchema, LoginSchema } from "@/validation/schemas";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { loginWithCredentials } from "./action";
 
 export default function Page() {
   // Inicialização do formulário conectando o resolver do Zod ao LoginSchema
@@ -33,7 +34,22 @@ export default function Page() {
 
   // Função de submissão
   const handleSubmit = async (data: LoginSchema) => {
-    console.log("Login: ", data);
+    // Invocação da Server Action de login
+    const response = await loginWithCredentials(data);
+
+    // Se o servidor retornar falha na validação
+    if (!response.success) {
+      if (Array.isArray(response.errors)) {
+        // Mapeia iterativamente os erros do servidor nos inputs do formulário
+        response.errors.forEach((issue) => {
+          issue.path.forEach((path) => {
+            form.setError(path as keyof LoginSchema, {
+              message: issue.message,
+            });
+          });
+        });
+      }
+    }
   };
 
   return (
