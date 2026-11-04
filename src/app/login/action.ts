@@ -1,18 +1,19 @@
 "use server";
 
+import { signIn } from "@/auth";
 import { loginSchema } from "@/validation/schemas";
 import { $ZodIssue } from "zod/v4/core";
-
-interface LoginWithCredentialsProps {
-  email: string;
-  password: string;
-}
 
 interface ActionResponse {
   success: boolean;
   message: string;
   data?: unknown;
   errors?: $ZodIssue[];
+}
+
+interface LoginWithCredentialsProps {
+  email: string;
+  password: string;
 }
 
 export const loginWithCredentials = async ({
@@ -35,10 +36,27 @@ export const loginWithCredentials = async ({
     };
   }
 
-  console.log("Chegamos até aqui: ", email, password);
+  try {
+    // Executa a autenticação via NextAuth com redirect desativado para tratamento de erro no client
+    await signIn("credentials", { email, password, redirect: false });
+  } catch (e: unknown) {
+    console.error(e);
+
+    if (e instanceof Error) {
+      return {
+        success: false,
+        message: e.message,
+      };
+    }
+
+    return {
+      success: false,
+      message: "Erro de login",
+    };
+  }
 
   return {
     success: true,
-    message: "Login realizado com sucesso.",
+    message: "Login realizado com sucesso",
   };
 };
