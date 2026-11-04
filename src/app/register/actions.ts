@@ -2,7 +2,7 @@
 
 import { $ZodIssue } from "zod/v4/core";
 import { Prisma, User } from "../../../generated/prisma/client";
-import { userSchema } from "./schemas";
+import { userSchema } from "../../validation/schemas";
 import { hash } from "bcryptjs";
 import { prisma } from "@/lib/client";
 

@@ -22,7 +22,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import z from "zod/v4";
 import { registerUser } from "./actions";
-import { userSchema, UserSchema } from "./schemas";
+import { userSchema, UserSchema } from "../../validation/schemas";
 import Link from "next/link";
 
 export default function Page() {

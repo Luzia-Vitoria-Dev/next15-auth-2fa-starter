@@ -18,10 +18,23 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useForm } from "react-hook-form";
+import { loginSchema, LoginSchema } from "@/validation/schemas";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 export default function Page() {
-  const form = useForm();
-  const handleSubmit = async () => {};
+  // Inicialização do formulário conectando o resolver do Zod ao LoginSchema
+  const form = useForm<LoginSchema>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
+
+  // Função de submissão
+  const handleSubmit = async (data: LoginSchema) => {
+    console.log("Login: ", data);
+  };
 
   return (
     <div className="flex justify-center items-center min-h-screen">
