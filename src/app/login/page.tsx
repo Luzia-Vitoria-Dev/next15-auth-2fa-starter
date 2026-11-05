@@ -7,6 +7,7 @@ import {
   CardTitle,
   CardDescription,
   CardContent,
+  CardFooter,
 } from "@/components/ui/card";
 import {
   Form,
@@ -22,6 +23,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { loginWithCredentials } from "./action";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function Page() {
   const router = useRouter();
@@ -122,6 +124,22 @@ export default function Page() {
             </form>
           </Form>
         </CardContent>
+        {/* Rodapé do Card contendo links para cadastro e recuperação de senha */}
+        <CardFooter className="flex-col">
+          <div className="text-muted-foreground text-sm">
+            Ainda não tem conta?{" "}
+            <Link href="/register" className="underline">
+              Registre-se
+            </Link>
+          </div>
+
+          <div className="text-muted-foreground text-sm">
+            Esqueceu sua senha?{" "}
+            <Link href="/password-reset" className="underline">
+              Alterar senha
+            </Link>
+          </div>
+        </CardFooter>
       </Card>
     </div>
   );
