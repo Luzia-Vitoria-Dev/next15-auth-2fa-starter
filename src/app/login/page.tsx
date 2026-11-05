@@ -21,8 +21,11 @@ import { loginSchema, LoginSchema } from "@/validation/schemas";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { loginWithCredentials } from "./action";
+import { useRouter } from "next/navigation";
 
 export default function Page() {
+  const router = useRouter();
+
   // Inicialização do formulário conectando o resolver do Zod ao LoginSchema
   const form = useForm<LoginSchema>({
     resolver: zodResolver(loginSchema),
@@ -50,10 +53,15 @@ export default function Page() {
         });
       }
     }
-  };
 
+    // Redireciona o usuário autenticado para a rota protegida
+    if (response.success) {
+      router.push("/my-account");
+    }
+  };
   return (
     <div className="flex justify-center items-center min-h-screen">
+      {" "}
       <Card className="w-full max-w-sm">
         <CardHeader>
           <CardTitle>Login</CardTitle>
