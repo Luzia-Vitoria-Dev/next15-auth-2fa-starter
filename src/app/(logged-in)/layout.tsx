@@ -1,7 +1,16 @@
 import Link from "next/link";
 import LogoutButton from "../logout-button";
+import { auth } from "@/auth";
 
-export default function Layout({ children }: { children: React.ReactNode }) {
+export default async function Layout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  // Executa a validação da sessão no servidor e imprime no console para debug
+  const session = await auth();
+  console.log("SESSION: ", session);
+
   return (
     <div className="min-h-screen flex flex-col">
       {/* Barra de Navegação Superior exclusiva para usuários logados */}
