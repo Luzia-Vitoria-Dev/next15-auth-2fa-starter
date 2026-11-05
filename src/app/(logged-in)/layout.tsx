@@ -1,15 +1,20 @@
 import Link from "next/link";
-import LogoutButton from "../logout-button";
+import LogoutButton from "./logout-button";
 import { auth } from "@/auth";
+import { redirect } from "next/navigation";
 
 export default async function Layout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  // Executa a validação da sessão no servidor e imprime no console para debug
+  // Verifica se o usuário possui uma sessão ativa válida no servidor
   const session = await auth();
-  console.log("SESSION: ", session);
+
+  // Se não estiver autenticado, redireciona imediatamente para a tela de login
+  if (!session?.user?.id) {
+    redirect("/login");
+  }
 
   return (
     <div className="min-h-screen flex flex-col">
