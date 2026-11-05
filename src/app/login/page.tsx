@@ -40,12 +40,15 @@ export default function Page() {
     // Invocação da Server Action de login
     const response = await loginWithCredentials(data);
 
+    console.log(response);
+
     // Se o servidor retornar falha na validação
     if (!response.success) {
       if (Array.isArray(response.errors)) {
         // Mapeia iterativamente os erros do servidor nos inputs do formulário
         response.errors.forEach((issue) => {
           issue.path.forEach((path) => {
+            // Mapeia erros customizados (como o "root") para o estado do formulário
             form.setError(path as keyof LoginSchema, {
               message: issue.message,
             });
@@ -59,6 +62,7 @@ export default function Page() {
       router.push("/my-account");
     }
   };
+
   return (
     <div className="flex justify-center items-center min-h-screen">
       {" "}
@@ -107,6 +111,13 @@ export default function Page() {
 
                 {/* BOTAO DE SUBMISSAO */}
                 <Button type="submit">Entrar</Button>
+
+                {/* Exibição condicional de erro global (root) */}
+                {!!form.formState.errors.root?.message && (
+                  <FormMessage>
+                    {form.formState.errors.root?.message}
+                  </FormMessage>
+                )}
               </fieldset>
             </form>
           </Form>
