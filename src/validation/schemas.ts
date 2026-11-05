@@ -5,10 +5,8 @@ const passwordSchema = z
   .string()
   .min(6, "A senha deve ter no mínimo 6 caracteres");
 
-// Schema de validação Zod para Registro de Usuários
-export const userSchema = z
+export const passwordConfirmSchema = z
   .object({
-    email: emailSchema,
     password: passwordSchema,
     passwordConfirm: z.string(),
   })
@@ -23,12 +21,28 @@ export const userSchema = z
     }
   });
 
+// Schema de validação Zod para Registro de Usuários
+export const userSchema = z
+  .object({
+    email: emailSchema,
+  })
+  .and(passwordConfirmSchema);
+
 // Schema simplificado focado exclusivamente no Login
 export const loginSchema = z.object({
   email: emailSchema,
   password: passwordSchema,
 });
 
+// Schema específico para alteração de senha combinando senha atual com o validador de confirmação
+export const changePasswordConfirm = z
+  .object({
+    currentPassword: passwordSchema,
+  })
+  .and(passwordConfirmSchema);
+
 // Tipos TypeScript inferidos automaticamente a partir das regras dos Schemas
 export type UserSchema = z.infer<typeof userSchema>;
 export type LoginSchema = z.infer<typeof loginSchema>;
+
+export type ChangePasswordConfirm = z.infer<typeof changePasswordConfirm>;
