@@ -35,7 +35,7 @@ export const loginSchema = z.object({
 });
 
 // Schema específico para alteração de senha combinando senha atual com o validador de confirmação
-export const changePasswordConfirm = z
+export const changePasswordConfirmSchema = z
   .object({
     currentPassword: passwordSchema,
   })
@@ -44,5 +44,6 @@ export const changePasswordConfirm = z
 // Tipos TypeScript inferidos automaticamente a partir das regras dos Schemas
 export type UserSchema = z.infer<typeof userSchema>;
 export type LoginSchema = z.infer<typeof loginSchema>;
-
-export type ChangePasswordConfirm = z.infer<typeof changePasswordConfirm>;
+export type ChangePasswordConfirmSchema = z.infer<
+  typeof changePasswordConfirmSchema
+>;

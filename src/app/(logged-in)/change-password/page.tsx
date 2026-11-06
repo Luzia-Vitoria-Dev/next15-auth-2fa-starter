@@ -12,16 +12,17 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import {
-  changePasswordConfirm,
-  ChangePasswordConfirm,
+  changePasswordConfirmSchema,
+  ChangePasswordConfirmSchema,
 } from "@/validation/schemas";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { changePassword } from "./action";
 
 export default function Page() {
   // Inicialização do formulário conectando o resolver do Zod ao ChangePasswordConfirm
-  const form = useForm<ChangePasswordConfirm>({
-    resolver: zodResolver(changePasswordConfirm),
+  const form = useForm<ChangePasswordConfirmSchema>({
+    resolver: zodResolver(changePasswordConfirmSchema),
     defaultValues: {
       currentPassword: "",
       password: "",
@@ -30,8 +31,25 @@ export default function Page() {
   });
 
   // Função de submissão
-  const handleSubmit = async (data: ChangePasswordConfirm) => {
-    console.log("Enviar para server action: ", data);
+  const handleSubmit = async (data: ChangePasswordConfirmSchema) => {
+    const response = await changePassword(data);
+
+    console.log(response);
+
+    // Se o servidor retornar falha na validação
+    if (!response.success) {
+      if (Array.isArray(response.errors)) {
+        // Mapeia iterativamente os erros do servidor nos inputs do formulário
+        response.errors.forEach((issue) => {
+          issue.path.forEach((path) => {
+            // Mapeia erros customizados (como o "root") para o estado do formulário
+            form.setError(path as keyof ChangePasswordConfirmSchema, {
+              message: issue.message,
+            });
+          });
+        });
+      }
+    }
   };
 
   return (
