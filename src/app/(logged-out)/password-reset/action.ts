@@ -3,7 +3,7 @@
 import { prisma } from "@/lib/client";
 import { ActionResponse } from "@/types/action-response";
 import { resetPasswordSchema } from "@/validation/schemas";
-import { randomBytes } from "crypto";
+import { randomBytes } from "node:crypto";
 
 interface PasswordResetProps {
   email: string;
@@ -40,12 +40,21 @@ export const passwordReset = async ({
     };
   }
 
-  // Token de autorização para reset de senha
+  // Geração do token criptográfico seguro
   const passwordResetToken = randomBytes(32).toString("hex");
   console.log("Token de autorização para reset de senha: ", passwordResetToken);
 
+  // Define a expiração do token para daqui a 60 minutos (3600000 ms)
+  const tokenExpiry = new Date(Date.now() + 3600000); // 60 minutos
+
+  // Salva o token gerado vinculado ao ID do usuário na tabela
+  const newPasswordResetToken = await prisma.passwordResetToken.create({
+    data: { token: passwordResetToken, userId: user.id, tokenExpiry },
+  });
+
   return {
     success: true,
-    message: "Processo de reset de senha",
+    message: "Solicitação de alteração de senha iniciada com sucesso",
+    data: newPasswordResetToken,
   };
 };
