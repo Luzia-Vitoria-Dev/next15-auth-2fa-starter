@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { prisma } from "@/lib/client";
 import Link from "next/link";
+import UpdatePasswordForm from "./components/update-password-form";
 
 export default async function Page({
   searchParams,
@@ -36,7 +37,9 @@ export default async function Page({
           <CardHeader>
             <CardTitle>Atualizando a senha</CardTitle>
           </CardHeader>
-          <CardContent>TODO: Formulário de atualização de senha</CardContent>
+          <CardContent>
+            <UpdatePasswordForm />
+          </CardContent>
         </Card>
       ) : (
         <Card>

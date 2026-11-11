@@ -11,7 +11,7 @@ export const passwordConfirmSchema = z
     passwordConfirm: z.string(),
   })
   .superRefine((data, context) => {
-    // Camada avançada de validação: compara campos interdependentes (se as senhas coincidem)
+    // Validação avançada: garante que a nova senha e a confirmação coincidem
     if (data.password !== data.passwordConfirm) {
       context.addIssue({
         code: "custom",
@@ -53,3 +53,4 @@ export type ChangePasswordConfirmSchema = z.infer<
   typeof changePasswordConfirmSchema
 >;
 export type ResetPasswordSchema = z.infer<typeof resetPasswordSchema>;
+export type PasswordConfirmSchema = z.infer<typeof passwordConfirmSchema>;
