@@ -18,6 +18,7 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { changePassword } from "./action";
+import { toast } from "sonner";
 
 export default function Page() {
   // Inicialização do formulário conectando o resolver do Zod ao ChangePasswordConfirm
@@ -49,6 +50,12 @@ export default function Page() {
           });
         });
       }
+    }
+
+    // Dispara a notificação de sucesso flutuante utilizando o Sonner
+    if (response.success) {
+      form.reset(); // Limpa o formulário após o sucesso
+      toast.success(response.message);
     }
   };
 
