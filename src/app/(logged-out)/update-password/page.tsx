@@ -1,4 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { prisma } from "@/lib/client";
 import Link from "next/link";
 
 export default async function Page({
@@ -13,8 +14,19 @@ export default async function Page({
   let tokenIsValid = false;
 
   if (token) {
-    // TODO: Validar se o token existe no banco de dados e se está dentro do prazo de validade (tokenExpiry)
-    tokenIsValid = true;
+    // Busca na tabela de tokens de recuperação o registro correspondente ao token informado
+    const passwordResetToken = await prisma.passwordResetToken.findFirst({
+      where: { token },
+    });
+
+    // Valida se o registro que foi encontrado, possui token válido e se a data atual é anterior à expiração
+    if (
+      passwordResetToken &&
+      passwordResetToken.token &&
+      Date.now() < passwordResetToken.tokenExpiry.getTime()
+    ) {
+      tokenIsValid = true;
+    }
   }
 
   return (
