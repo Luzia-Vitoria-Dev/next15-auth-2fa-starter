@@ -41,9 +41,15 @@ export const changePasswordConfirmSchema = z
   })
   .and(passwordConfirmSchema);
 
+// Schema de redefinição de senha
+export const resetPasswordSchema = z.object({
+  email: emailSchema,
+});
+
 // Tipos TypeScript inferidos automaticamente a partir das regras dos Schemas
 export type UserSchema = z.infer<typeof userSchema>;
 export type LoginSchema = z.infer<typeof loginSchema>;
 export type ChangePasswordConfirmSchema = z.infer<
   typeof changePasswordConfirmSchema
 >;
+export type ResetPasswordSchema = z.infer<typeof resetPasswordSchema>;

@@ -18,49 +18,44 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { loginSchema, LoginSchema } from "@/validation/schemas";
+import { resetPasswordSchema, ResetPasswordSchema } from "@/validation/schemas";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import Link from "next/link";
+import { passwordReset } from "./action";
 
 export default function Page() {
   // Inicialização do formulário conectando o resolver do Zod ao LoginSchema
-  const form = useForm<LoginSchema>({
-    resolver: zodResolver(loginSchema),
+  const form = useForm<ResetPasswordSchema>({
+    resolver: zodResolver(resetPasswordSchema),
     defaultValues: {
       email: "",
-      password: "",
     },
   });
 
   // Função de submissão
-  const handleSubmit = async (data: LoginSchema) => {
+  const handleSubmit = async (data: ResetPasswordSchema) => {
     console.log(data);
 
-    // // Invocação da Server Action de login
-    // const response = await loginWithCredentials(data);
+    // Invocação da Server Action de login
+    const response = await passwordReset(data);
 
-    // console.log(response);
+    console.log(response);
 
-    // // Se o servidor retornar falha na validação
-    // if (!response.success) {
-    //   if (Array.isArray(response.errors)) {
-    //     // Mapeia iterativamente os erros do servidor nos inputs do formulário
-    //     response.errors.forEach((issue) => {
-    //       issue.path.forEach((path) => {
-    //         // Mapeia erros customizados (como o "root") para o estado do formulário
-    //         form.setError(path as keyof LoginSchema, {
-    //           message: issue.message,
-    //         });
-    //       });
-    //     });
-    //   }
-    // }
-
-    // // Redireciona o usuário autenticado para a rota protegida
-    // if (response.success) {
-    //   router.push("/my-account");
-    // }
+    // Se o servidor retornar falha na validação
+    if (!response.success) {
+      if (Array.isArray(response.errors)) {
+        // Mapeia iterativamente os erros do servidor nos inputs do formulário
+        response.errors.forEach((issue) => {
+          issue.path.forEach((path) => {
+            // Mapeia erros customizados (como o "root") para o estado do formulário
+            form.setError(path as keyof ResetPasswordSchema, {
+              message: issue.message,
+            });
+          });
+        });
+      }
+    }
   };
 
   return (
@@ -121,7 +116,7 @@ export default function Page() {
 
           <div className="text-muted-foreground text-sm">
             Já tem uma conta?{" "}
-            <Link href="/" className="underline">
+            <Link href="/login" className="underline">
               Entrar
             </Link>
           </div>
