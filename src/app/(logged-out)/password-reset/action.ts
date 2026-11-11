@@ -47,9 +47,11 @@ export const passwordReset = async ({
   // Define a expiração do token para daqui a 60 minutos (3600000 ms)
   const tokenExpiry = new Date(Date.now() + 3600000); // 60 minutos
 
-  // Salva o token gerado vinculado ao ID do usuário na tabela
-  const newPasswordResetToken = await prisma.passwordResetToken.create({
-    data: { token: passwordResetToken, userId: user.id, tokenExpiry },
+  // Substitui a criação simples por Upsert: se já houver um registro para o userId, atualiza; senão, cria.
+  const newPasswordResetToken = await prisma.passwordResetToken.upsert({
+    where: { userId: user.id },
+    create: { token: passwordResetToken, userId: user.id, tokenExpiry },
+    update: { token: passwordResetToken, tokenExpiry },
   });
 
   return {
