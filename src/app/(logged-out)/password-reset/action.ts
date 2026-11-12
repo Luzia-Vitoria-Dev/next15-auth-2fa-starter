@@ -43,7 +43,6 @@ export const passwordReset = async ({
 
   // Geração do token criptográfico seguro
   const passwordResetToken = randomBytes(32).toString("hex");
-  console.log("Token de autorização para reset de senha: ", passwordResetToken);
 
   // Define a expiração do token para daqui a 60 minutos (3600000 ms)
   const tokenExpiry = new Date(Date.now() + 3600000); // 60 minutos
@@ -55,8 +54,9 @@ export const passwordReset = async ({
     update: { token: passwordResetToken, tokenExpiry },
   });
 
-  // Enviar o e-mail com o token de reset de senha para o usuário
-  await sendEmailLinkResetPassword({ to: email });
+  // Constrói a URL completa com o token gerado e dispara o e-mail HTML personalizado
+  const linkResetPassword = `http://localhost:3000/update-password?token=${passwordResetToken}`;
+  await sendEmailLinkResetPassword({ to: email, linkResetPassword });
 
   return {
     success: true,
