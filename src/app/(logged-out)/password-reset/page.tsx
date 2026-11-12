@@ -23,6 +23,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import Link from "next/link";
 import { passwordReset } from "./action";
+import { toast } from "sonner";
 
 export default function Page() {
   // Inicialização do formulário conectando o resolver do Zod ao LoginSchema
@@ -35,15 +36,12 @@ export default function Page() {
 
   // Função de submissão
   const handleSubmit = async (data: ResetPasswordSchema) => {
-    console.log(data);
-
     // Invocação da Server Action de login
     const response = await passwordReset(data);
 
-    console.log(response);
-
     // Se o servidor retornar falha na validação
     if (!response.success) {
+      // Se houver erros específicos de campos (ex: e-mail não encontrado)
       if (Array.isArray(response.errors)) {
         // Mapeia iterativamente os erros do servidor nos inputs do formulário
         response.errors.forEach((issue) => {
@@ -54,8 +52,19 @@ export default function Page() {
             });
           });
         });
+      } else {
+        // Erro global na transação/envio de e-mail
+        form.setError("root", {
+          message: response.message || "Erro inesperado. Tente novamente.",
+        });
+        toast.error(response.message || "Erro na transação. Tente novamente.");
       }
+      return;
     }
+    // Sucesso no disparo do e-mail
+    toast.success(response.message, {
+      style: { background: "green", color: "#fff" },
+    });
   };
 
   return (
