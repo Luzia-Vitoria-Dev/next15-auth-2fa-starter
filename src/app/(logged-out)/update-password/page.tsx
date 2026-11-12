@@ -38,7 +38,8 @@ export default async function Page({
             <CardTitle>Atualizando a senha</CardTitle>
           </CardHeader>
           <CardContent>
-            <UpdatePasswordForm />
+            {/* Repassa o token validado via props para o formulário cliente */}
+            {token && <UpdatePasswordForm token={token} />}
           </CardContent>
         </Card>
       ) : (

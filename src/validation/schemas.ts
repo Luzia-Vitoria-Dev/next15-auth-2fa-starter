@@ -46,6 +46,13 @@ export const resetPasswordSchema = z.object({
   email: emailSchema,
 });
 
+// Novo schema combinando a validação obrigatória do token com as regras de senha
+export const updatePasswordConfirmSchema = z
+  .object({
+    token: z.string(),
+  })
+  .and(passwordConfirmSchema);
+
 // Tipos TypeScript inferidos automaticamente a partir das regras dos Schemas
 export type UserSchema = z.infer<typeof userSchema>;
 export type LoginSchema = z.infer<typeof loginSchema>;
@@ -54,3 +61,6 @@ export type ChangePasswordConfirmSchema = z.infer<
 >;
 export type ResetPasswordSchema = z.infer<typeof resetPasswordSchema>;
 export type PasswordConfirmSchema = z.infer<typeof passwordConfirmSchema>;
+export type UpdatePasswordConfirmSchema = z.infer<
+  typeof updatePasswordConfirmSchema
+>;

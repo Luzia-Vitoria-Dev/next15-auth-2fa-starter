@@ -11,26 +11,27 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import {
-  passwordConfirmSchema,
-  PasswordConfirmSchema,
+  updatePasswordConfirmSchema,
+  UpdatePasswordConfirmSchema,
 } from "@/validation/schemas";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { updatePassword } from "./action";
 import { toast } from "sonner";
 
-export default function UpdatePasswordForm() {
+export default function UpdatePasswordForm({ token }: { token: string }) {
   // Inicialização do formulário conectando o resolver do Zod ao ChangePasswordConfirm
-  const form = useForm<PasswordConfirmSchema>({
-    resolver: zodResolver(passwordConfirmSchema),
+  const form = useForm<UpdatePasswordConfirmSchema>({
+    resolver: zodResolver(updatePasswordConfirmSchema),
     defaultValues: {
+      token, // Inicializa o token oculto no estado do formulário
       password: "",
       passwordConfirm: "",
     },
   });
 
   // Função de submissão
-  const handleSubmit = async (data: PasswordConfirmSchema) => {
+  const handleSubmit = async (data: UpdatePasswordConfirmSchema) => {
     const response = await updatePassword(data);
 
     console.log(response);
@@ -38,7 +39,7 @@ export default function UpdatePasswordForm() {
       if (Array.isArray(response.errors)) {
         response.errors.forEach((issue) => {
           issue.path.forEach((path) => {
-            form.setError(path as keyof PasswordConfirmSchema, {
+            form.setError(path as keyof UpdatePasswordConfirmSchema, {
               message: issue.message,
             });
           });

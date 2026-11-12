@@ -1,34 +1,38 @@
 "use server";
 
 import { ActionResponse } from "@/types/action-response";
-import { passwordConfirmSchema } from "@/validation/schemas";
+import { updatePasswordConfirmSchema } from "@/validation/schemas";
 
 interface UpdatePasswordProps {
+  token: string;
   password: string;
   passwordConfirm: string;
 }
 
 export const updatePassword = async ({
+  token,
   password,
   passwordConfirm,
 }: UpdatePasswordProps): Promise<ActionResponse> => {
-  console.log("Server action: ", password, passwordConfirm);
-
   // Validação defensiva no servidor utilizando o Zod
-  const passworConfirmSchemaValidation = passwordConfirmSchema.safeParse({
-    password,
-    passwordConfirm,
-  });
+  const updatePasswordConfirmSchemaValidation =
+    updatePasswordConfirmSchema.safeParse({
+      token,
+      password,
+      passwordConfirm,
+    });
 
-  if (!passworConfirmSchemaValidation.success) {
+  if (!updatePasswordConfirmSchemaValidation.success) {
     return {
       success: false,
       message: "Erro ao tentar validar a senha",
-      errors: passworConfirmSchemaValidation.error.issues,
+      errors: updatePasswordConfirmSchemaValidation.error.issues,
     };
   }
 
   //TODO: Atualizar a senha no banco de dados
+
+  console.log("### TOKEN RECEBIDO NA ACTION: ", token);
 
   return {
     success: true,
