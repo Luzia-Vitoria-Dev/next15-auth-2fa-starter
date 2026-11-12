@@ -44,6 +44,9 @@ export default function UpdatePasswordForm({ token }: { token: string }) {
             });
           });
         });
+      } else {
+        // Se o erro não for de campo (ex: Token inválido/expirado), recarrega a página para exibir o card de expiração
+        window.location.reload();
       }
     }
 
