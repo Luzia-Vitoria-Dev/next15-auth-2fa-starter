@@ -18,6 +18,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { updatePassword } from "./action";
 import { toast } from "sonner";
+import Link from "next/link";
 
 export default function UpdatePasswordForm({ token }: { token: string }) {
   // Inicialização do formulário conectando o resolver do Zod ao ChangePasswordConfirm
@@ -45,7 +46,7 @@ export default function UpdatePasswordForm({ token }: { token: string }) {
           });
         });
       } else {
-        // Se o erro não for de campo (ex: Token inválido/expirado), recarrega a página para exibir o card de expiração
+        // Recarrega a página caso o token tenha expirado durante a submissão
         window.location.reload();
       }
     }
@@ -58,7 +59,18 @@ export default function UpdatePasswordForm({ token }: { token: string }) {
     }
   };
 
-  return (
+  // Renderização condicional baseada no sucesso da submissão
+  return form.formState.isSubmitSuccessful ? (
+    <>
+      <p>Senha atualizada com sucesso!</p>
+      <p>
+        <Link className="underline" href="/login">
+          Clique aqui
+        </Link>{" "}
+        para fazer login na sua conta.
+      </p>
+    </>
+  ) : (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)}>
         {/* Desabilita todos os campos internos de uma só vez durante o processamento assíncrono */}
