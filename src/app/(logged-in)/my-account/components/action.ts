@@ -79,8 +79,6 @@ export const activate2fa = async (token: string) => {
     // Valida o código OTP de 6 dígitos enviado pelo usuário contra o segredo salvo
     const tokenValid = await verify({ secret: twoFactorSecret, token });
 
-    console.log("tokenValid: ", tokenValid);
-
     if (!tokenValid.valid) {
       return {
         message: "OTP é inválido.",
@@ -99,6 +97,4 @@ export const activate2fa = async (token: string) => {
       success: true,
     };
   }
-
-  console.log("Gerar OTP: ", twoFactorSecret, token);
 };

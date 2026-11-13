@@ -39,12 +39,27 @@ export default function TwoFactorAuthForm({
     }
   };
 
-  // Manipulador de submissão do formulário OTP chamando a Server Action
+  // Manipulador de submissão do OTP com tratamento de feedback visual e de estado
   const handleOTPSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     const response = await activate2fa(otp);
-    console.log("Resposta: ", response);
+
+    // Tratamento de erro na validação do token
+    if (!response?.success) {
+      toast.error(response?.message, {
+        style: { background: "red", color: "#fff" },
+      });
+    }
+
+    // Tratamento de sucesso na ativação do 2FA
+    if (response?.success) {
+      toast.success(response?.message, {
+        style: { background: "green", color: "#fff" },
+      });
+
+      setIsActivated(true); // Altera o estado local para exibir o botão de desativar
+    }
   };
 
   return (
@@ -108,7 +123,8 @@ export default function TwoFactorAuthForm({
                     <InputOTPSlot index={5} />
                   </InputOTPGroup>
                 </InputOTP>
-                <Button>Ativar 2FA</Button>
+                {/* Botão desabilitado dinamicamente enquanto o OTP não tiver 6 dígitos */}
+                <Button disabled={otp.length !== 6}>Ativar 2FA</Button>
                 {/* Botão para retornar ao passo anterior (QR Code) */}
                 <Button variant={"outline"} onClick={() => setStep(2)}>
                   Cancelar
