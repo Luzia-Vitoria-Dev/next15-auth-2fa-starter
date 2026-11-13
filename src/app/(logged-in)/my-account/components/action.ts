@@ -46,7 +46,7 @@ export const get2faSecret = async (): Promise<ActionResponse> => {
 
   // Retorno provisório para validação do fluxo de clique no front-end
   return {
-    message: "Chegamos até o método get2faSecret",
+    message: "QR code do 2FA gerado com sucesso.",
     success: true,
     data: uri, // Retorna a URI gerada para o front-end
   };
