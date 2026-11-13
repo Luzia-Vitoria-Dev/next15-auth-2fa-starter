@@ -5,6 +5,13 @@ import { useState } from "react";
 import { get2faSecret } from "./action";
 import { toast } from "sonner";
 import { QRCodeSVG } from "qrcode.react";
+import { REGEXP_ONLY_DIGITS } from "input-otp";
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSeparator,
+  InputOTPSlot,
+} from "@/components/ui/input-otp";
 
 interface TwoFactorAuthFormProps {
   twoFactorActivated: boolean;
@@ -31,6 +38,13 @@ export default function TwoFactorAuthForm({
     }
   };
 
+  // Manipulador de submissão do código OTP inserido pelo usuário
+  const handleOTPSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    console.log("Disparar ação para confirmar a ativação do 2FA.");
+  };
+
   return (
     <div>
       {isActivated && (
@@ -43,11 +57,14 @@ export default function TwoFactorAuthForm({
 
       {!isActivated && (
         <div>
+          {/* ETAPA 1: Botão inicial de habilitação */}
           {step == 1 && (
             <Button onClick={handleEnableClick}>
               Habilitar autenticação de dois fatores
             </Button>
           )}
+
+          {/* ETAPA 2: Exibição do QR Code */}
           {step == 2 && (
             <div className="flex flex-col gap-2">
               <p className="text-xs text-muted-foreground py-2">
@@ -60,6 +77,36 @@ export default function TwoFactorAuthForm({
               <Button onClick={() => setStep(1)} variant={"outline"}>
                 Cancelar
               </Button>
+            </div>
+          )}
+
+          {/* ETAPA 3: Formulário de Inserção de Código OTP */}
+          {step == 3 && (
+            <div className="flex flex-col gap-2">
+              <p className="text-xs text-muted-foreground">
+                Informe o código de verificação do seu App de Autenticação (ex.:
+                Google Authenticator, Microsoft Authenticator)
+              </p>
+              <form onSubmit={handleOTPSubmit} className="flex flex-col gap-2">
+                <InputOTP maxLength={6} pattern={REGEXP_ONLY_DIGITS}>
+                  <InputOTPGroup>
+                    <InputOTPSlot index={0} />
+                    <InputOTPSlot index={1} />
+                    <InputOTPSlot index={2} />
+                  </InputOTPGroup>
+                  <InputOTPSeparator />
+                  <InputOTPGroup>
+                    <InputOTPSlot index={3} />
+                    <InputOTPSlot index={4} />
+                    <InputOTPSlot index={5} />
+                  </InputOTPGroup>
+                </InputOTP>
+                <Button>Ativar 2FA</Button>
+                {/* Botão para retornar ao passo anterior (QR Code) */}
+                <Button variant={"outline"} onClick={() => setStep(2)}>
+                  Cancelar
+                </Button>
+              </form>
             </div>
           )}
         </div>
