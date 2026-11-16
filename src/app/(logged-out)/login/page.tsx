@@ -21,7 +21,7 @@ import { Input } from "@/components/ui/input";
 import { loginSchema, LoginSchema } from "@/validation/schemas";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { loginWithCredentials } from "./action";
+import { loginWithCredentials, preLoginCheck } from "./action";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
@@ -39,29 +39,47 @@ export default function Page() {
 
   // Função de submissão
   const handleSubmit = async (data: LoginSchema) => {
-    // Invocação da Server Action de login
-    const response = await loginWithCredentials(data);
+    // Verificar credenciais e o status de 2FA antes de criar a sessão
+    const preLoginCheckResponse = await preLoginCheck(data);
 
-    console.log(response);
-
-    // Se o servidor retornar falha na validação
-    if (!response.success) {
-      if (Array.isArray(response.errors)) {
-        // Mapeia iterativamente os erros do servidor nos inputs do formulário
-        response.errors.forEach((issue) => {
-          issue.path.forEach((path) => {
-            // Mapeia erros customizados (como o "root") para o estado do formulário
-            form.setError(path as keyof LoginSchema, {
-              message: issue.message,
-            });
-          });
-        });
-      }
+    if (!preLoginCheckResponse.success) {
+      form.setError("root" as keyof LoginSchema, {
+        message: preLoginCheckResponse.message,
+      });
     }
 
-    // Redireciona o usuário autenticado para a rota protegida
-    if (response.success) {
-      router.push("/my-account");
+    const twoFactorActivated = (
+      preLoginCheckResponse?.data as {
+        twoFactorActivated?: boolean;
+      }
+    )?.twoFactorActivated;
+
+    // Ramificação do fluxo: se 2FA ativo, exige OTP; caso contrário, autentica direto
+    if (twoFactorActivated) {
+      console.log("Exibir o formulário para inserir o OTP.");
+    } else {
+      // Invocação da Server Action de login
+      const response = await loginWithCredentials(data);
+
+      // Se o servidor retornar falha na validação
+      if (!response.success) {
+        if (Array.isArray(response.errors)) {
+          // Mapeia iterativamente os erros do servidor nos inputs do formulário
+          response.errors.forEach((issue) => {
+            issue.path.forEach((path) => {
+              // Mapeia erros customizados (como o "root") para o estado do formulário
+              form.setError(path as keyof LoginSchema, {
+                message: issue.message,
+              });
+            });
+          });
+        }
+      }
+
+      // Redireciona o usuário autenticado para a rota protegida
+      if (response.success) {
+        router.push("/my-account");
+      }
     }
   };
 

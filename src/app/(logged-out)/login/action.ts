@@ -1,8 +1,10 @@
 "use server";
 
 import { signIn } from "@/auth";
+import { prisma } from "@/lib/client";
 import { ActionResponse } from "@/types/action-response";
 import { loginSchema } from "@/validation/schemas";
+import { compare } from "bcryptjs";
 import { AuthError } from "next-auth";
 
 interface LoginWithCredentialsProps {
@@ -68,5 +70,45 @@ export const loginWithCredentials = async ({
   return {
     success: true,
     message: "Login realizado com sucesso",
+  };
+};
+
+// Validação prévia das credenciais para descobrir se o usuário exige 2FA
+export const preLoginCheck = async ({
+  email,
+  password,
+}: {
+  email: string;
+  password: string;
+}): Promise<ActionResponse> => {
+  console.log("Action Pré Login: ", email, password);
+
+  // Busca o usuário no banco de dados via Prisma
+  const user = await prisma.user.findUnique({
+    where: { email: email as string },
+  });
+
+  if (!user) {
+    return {
+      success: false,
+      message: "Usuário e/ou senha inválido.",
+    };
+  }
+
+  // Compara a senha enviada com o hash salvo no banco de dados
+  const isPasswordValid = await compare(password as string, user.password);
+
+  if (!isPasswordValid) {
+    return {
+      success: false,
+      message: "Usuário e/ou senha inválido.",
+    };
+  }
+
+  // Retorna o status de ativação do 2FA para guiar o próximo passo no client
+  return {
+    success: true,
+    message: "Autenticação confirmada.",
+    data: { twoFactorActivated: user.twoFactorActivated },
   };
 };
