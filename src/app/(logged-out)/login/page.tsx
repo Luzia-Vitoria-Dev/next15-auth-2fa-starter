@@ -32,6 +32,7 @@ import {
   InputOTPSlot,
 } from "@/components/ui/input-otp";
 import { REGEXP_ONLY_DIGITS } from "input-otp";
+import { toast } from "sonner";
 
 export default function Page() {
   const router = useRouter();
@@ -68,7 +69,6 @@ export default function Page() {
 
     // Se o usuário tiver 2FA ativo, avança para a tela de OTP mantendo e-mail e senha no estado do form
     if (twoFactorActivated) {
-      console.log("Exibir o formulário para inserir o OTP.");
       setStep(2);
     } else {
       // Invocação da Server Action de login
@@ -99,9 +99,30 @@ export default function Page() {
   // Manipulador provisório para submissão do código OTP no Passo 2
   const handleOTPSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log(
-      "Ativar a server action para validar o OTP e seguir ou não com o fluxo de login",
-    );
+
+    // Reúne as credenciais retidas no formulário junto com o código OTP digitado
+    const data = {
+      email: form.getValues("email"),
+      password: form.getValues("password"),
+      token: otp,
+    };
+
+    const response = await loginWithCredentials(data);
+
+    // Exibe toast vermelho caso o código OTP seja inválido ou expirado
+    if (!response.success) {
+      toast.error(response.message, {
+        style: { background: "red", color: "#fff" },
+      });
+    }
+
+    // Exibe toast verde de sucesso e redireciona para a área logada
+    if (response.success) {
+      toast.success(response.message, {
+        style: { background: "green", color: "#fff" },
+      });
+      router.push("/my-account");
+    }
   };
 
   return (

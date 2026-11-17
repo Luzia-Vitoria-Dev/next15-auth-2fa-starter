@@ -2,6 +2,7 @@ import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { prisma } from "./lib/client";
 import { compare } from "bcryptjs";
+import { verify } from "otplib";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
@@ -9,14 +10,15 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       credentials: {
         email: {},
         password: {},
+        token: {}, // Campo adicionado para receber o código OTP de 6 dígitos
       },
-      // CAMADA 1: AUTHORIZE (Validação de credenciais e consulta ao banco)
+      // CAMADA 1: AUTHORIZE (Validação de credenciais, consulta ao banco e verificação OTP)
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
           throw new Error("E-mail e senha são obrigatórios");
         }
 
-        // Busca o usuário no banco de dados via Prisma Singleton
+        // Busca o usuário no banco de dados via Prisma
         const user = await prisma.user.findUnique({
           where: { email: credentials.email as string },
         });
@@ -35,7 +37,24 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           throw new Error("Senha incorreta");
         }
 
-        // Retorna o objeto básico do usuário que alimenta o fluxo do token
+        // Verifica se a conta exige Autenticação de Dois Fatores (2FA)
+        const twoFactorActivated = user.twoFactorActivated;
+
+        if (twoFactorActivated) {
+          const twoFactorSecret = user.twoFactorSecret;
+
+          // Valida o token TOTP enviado contra o segredo armazenado no banco
+          const tokenValid = await verify({
+            secret: twoFactorSecret as string,
+            token: credentials.token as string,
+          });
+
+          if (!tokenValid.valid) {
+            throw new Error("OTP inválido.");
+          }
+        }
+
+        // Retorna o objeto básico do usuário que alimenta o fluxo do token JWT
         return {
           id: user.id,
           email: user.email,

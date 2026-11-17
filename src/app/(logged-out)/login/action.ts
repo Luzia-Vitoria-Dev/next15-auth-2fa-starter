@@ -10,11 +10,13 @@ import { AuthError } from "next-auth";
 interface LoginWithCredentialsProps {
   email: string;
   password: string;
+  token?: string; // Token opcional para contas com 2FA habilitado
 }
 
 export const loginWithCredentials = async ({
   email,
   password,
+  token,
 }: LoginWithCredentialsProps): Promise<ActionResponse> => {
   // -----------------------------------------------------------------------
   // Validação Defensiva Server-Side
@@ -33,8 +35,8 @@ export const loginWithCredentials = async ({
   }
 
   try {
-    // Executa a autenticação via NextAuth com redirect desativado para tratamento de erro no client
-    await signIn("credentials", { email, password, redirect: false });
+    // Repassa email, password e token para o método authorize() do NextAuth
+    await signIn("credentials", { email, password, token, redirect: false });
   } catch (e: unknown) {
     console.error(e);
 
@@ -81,8 +83,6 @@ export const preLoginCheck = async ({
   email: string;
   password: string;
 }): Promise<ActionResponse> => {
-  console.log("Action Pré Login: ", email, password);
-
   // Busca o usuário no banco de dados via Prisma
   const user = await prisma.user.findUnique({
     where: { email: email as string },
