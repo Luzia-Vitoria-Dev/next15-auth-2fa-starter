@@ -24,9 +24,21 @@ import { useForm } from "react-hook-form";
 import { loginWithCredentials, preLoginCheck } from "./action";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useState } from "react";
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSeparator,
+  InputOTPSlot,
+} from "@/components/ui/input-otp";
+import { REGEXP_ONLY_DIGITS } from "input-otp";
 
 export default function Page() {
   const router = useRouter();
+
+  // Estados para controlar a etapa atual do login e os dígitos do OTP
+  const [step, setStep] = useState(1);
+  const [otp, setOtp] = useState("");
 
   // Inicialização do formulário conectando o resolver do Zod ao LoginSchema
   const form = useForm<LoginSchema>({
@@ -37,7 +49,7 @@ export default function Page() {
     },
   });
 
-  // Função de submissão
+  // Submissão inicial (E-mail e Senha)
   const handleSubmit = async (data: LoginSchema) => {
     // Verificar credenciais e o status de 2FA antes de criar a sessão
     const preLoginCheckResponse = await preLoginCheck(data);
@@ -54,9 +66,10 @@ export default function Page() {
       }
     )?.twoFactorActivated;
 
-    // Ramificação do fluxo: se 2FA ativo, exige OTP; caso contrário, autentica direto
+    // Se o usuário tiver 2FA ativo, avança para a tela de OTP mantendo e-mail e senha no estado do form
     if (twoFactorActivated) {
       console.log("Exibir o formulário para inserir o OTP.");
+      setStep(2);
     } else {
       // Invocação da Server Action de login
       const response = await loginWithCredentials(data);
@@ -83,82 +96,138 @@ export default function Page() {
     }
   };
 
+  // Manipulador provisório para submissão do código OTP no Passo 2
+  const handleOTPSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    console.log(
+      "Ativar a server action para validar o OTP e seguir ou não com o fluxo de login",
+    );
+  };
+
   return (
     <div className="flex justify-center items-center min-h-screen">
-      {" "}
-      <Card className="w-full max-w-sm">
-        <CardHeader>
-          <CardTitle>Login</CardTitle>
-          <CardDescription>Acesse sua conta.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(handleSubmit)}>
-              {/* Desabilita todos os campos internos de uma só vez durante o processamento assíncrono */}
-              <fieldset
-                className="flex flex-col gap-4"
-                disabled={form.formState.isSubmitting}
+      {/* ETAPA 1: Formulário Padrão de Credenciais */}
+      {step === 1 && (
+        <Card className="w-full max-w-sm">
+          <CardHeader>
+            <CardTitle>Login</CardTitle>
+            <CardDescription>Acesse sua conta.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(handleSubmit)}>
+                {/* Desabilita todos os campos internos de uma só vez durante o processamento assíncrono */}
+                <fieldset
+                  className="flex flex-col gap-4"
+                  disabled={form.formState.isSubmitting}
+                >
+                  {/* CAMPO: EMAIL */}
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email</FormLabel>
+                        <FormControl>
+                          <Input {...field} type="email" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* CAMPO: SENHA */}
+                  <FormField
+                    control={form.control}
+                    name="password"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Senha</FormLabel>
+                        <FormControl>
+                          <Input {...field} type="password" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* BOTAO DE SUBMISSAO */}
+                  <Button type="submit">Entrar</Button>
+
+                  {/* Exibição condicional de erro global (root) */}
+                  {!!form.formState.errors.root?.message && (
+                    <FormMessage>
+                      {form.formState.errors.root?.message}
+                    </FormMessage>
+                  )}
+                </fieldset>
+              </form>
+            </Form>
+          </CardContent>
+          {/* Rodapé do Card contendo links para cadastro e recuperação de senha */}
+          <CardFooter className="flex-col">
+            <div className="text-muted-foreground text-sm">
+              Ainda não tem conta?{" "}
+              <Link href="/register" className="underline">
+                Registre-se
+              </Link>
+            </div>
+
+            <div className="text-muted-foreground text-sm">
+              Esqueceu sua senha?{" "}
+              <Link href="/password-reset" className="underline">
+                Alterar senha
+              </Link>
+            </div>
+          </CardFooter>
+        </Card>
+      )}
+
+      {/* ETAPA 2: Formulário de Verificação OTP (Exibido apenas se 2FA estiver ativo) */}
+      {step === 2 && (
+        <Card className="w-full max-w-sm">
+          <CardHeader>
+            <CardTitle>OTP (One-Time Password)</CardTitle>
+            <CardDescription>
+              Entre com o OTP exibido no seu App de Autenticação.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleOTPSubmit} className="flex flex-col gap-2">
+              <InputOTP
+                maxLength={6}
+                pattern={REGEXP_ONLY_DIGITS}
+                value={otp}
+                onChange={setOtp}
               >
-                {/* CAMPO: EMAIL */}
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Email</FormLabel>
-                      <FormControl>
-                        <Input {...field} type="email" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                {/* CAMPO: SENHA */}
-                <FormField
-                  control={form.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Senha</FormLabel>
-                      <FormControl>
-                        <Input {...field} type="password" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                {/* BOTAO DE SUBMISSAO */}
-                <Button type="submit">Entrar</Button>
-
-                {/* Exibição condicional de erro global (root) */}
-                {!!form.formState.errors.root?.message && (
-                  <FormMessage>
-                    {form.formState.errors.root?.message}
-                  </FormMessage>
-                )}
-              </fieldset>
+                <InputOTPGroup>
+                  <InputOTPSlot index={0} />
+                  <InputOTPSlot index={1} />
+                  <InputOTPSlot index={2} />
+                </InputOTPGroup>
+                <InputOTPSeparator />
+                <InputOTPGroup>
+                  <InputOTPSlot index={3} />
+                  <InputOTPSlot index={4} />
+                  <InputOTPSlot index={5} />
+                </InputOTPGroup>
+              </InputOTP>
+              {/* Habilita o botão apenas após os 6 dígitos serem digitados */}
+              <Button disabled={otp.length !== 6}>Verificar</Button>
+              {/* Limpa a senha do formulário por segurança ao cancelar e voltar ao login */}
+              <Button
+                variant={"outline"}
+                onClick={() => {
+                  form.setValue("password", "");
+                  setStep(1);
+                }}
+              >
+                Cancelar
+              </Button>
             </form>
-          </Form>
-        </CardContent>
-        {/* Rodapé do Card contendo links para cadastro e recuperação de senha */}
-        <CardFooter className="flex-col">
-          <div className="text-muted-foreground text-sm">
-            Ainda não tem conta?{" "}
-            <Link href="/register" className="underline">
-              Registre-se
-            </Link>
-          </div>
-
-          <div className="text-muted-foreground text-sm">
-            Esqueceu sua senha?{" "}
-            <Link href="/password-reset" className="underline">
-              Alterar senha
-            </Link>
-          </div>
-        </CardFooter>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
